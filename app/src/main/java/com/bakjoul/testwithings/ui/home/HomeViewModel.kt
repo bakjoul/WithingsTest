@@ -19,23 +19,22 @@ class HomeViewModel(
     private val _searchQuery: MutableStateFlow<String> = MutableStateFlow("")
     private val _results: MutableStateFlow<List<ImageResult>> = MutableStateFlow(emptyList())
     private val _isLoading: MutableStateFlow<Boolean> = MutableStateFlow(false)
-    private val _isLoadingMore: MutableStateFlow<Boolean> = MutableStateFlow(false)
 
     private var currentPage = 1
+    private var isLoadingNextPage = false
+    private var hasMoreResults = true
 
     private val _state: StateFlow<HomeViewState> = combine(
             _searchQuery,
             _results,
-            _isLoading,
-            _isLoadingMore
-        ) { query, results, isLoading, isLoadingMore ->
+            _isLoading
+        ) { query, results, isLoading ->
             println("results: $results")
 
             HomeViewState(
                 searchQuery = query,
                 results = results,
-                isLoading = isLoading,
-                isLoadingMore = isLoadingMore
+                isLoading = isLoading
             )
         }.stateIn(
             scope = viewModelScope,
@@ -43,8 +42,7 @@ class HomeViewModel(
             initialValue = HomeViewState(
                 searchQuery = "",
                 results = emptyList(),
-                isLoading = false,
-                isLoadingMore = false
+                isLoading = false
         )
     )
     val state: StateFlow<HomeViewState> = _state
@@ -68,5 +66,31 @@ class HomeViewModel(
 
     fun onClearQueryButtonClicked() {
         _searchQuery.update { "" }
+    }
+
+    fun loadNextPage() {
+        if (isLoadingNextPage || !hasMoreResults) return
+        isLoadingNextPage = true
+
+        viewModelScope.launch {
+
+            try {
+                val nextPage = currentPage + 1
+                val results = searchForImagesUseCase(_searchQuery.value, nextPage)
+
+                if (results.isEmpty()) {
+                    hasMoreResults = false
+                    return@launch
+                }
+
+                _results.update { currentResults ->
+                    (currentResults + results).distinctBy { it.id }
+                }
+
+                currentPage = nextPage
+            } finally {
+                isLoadingNextPage = false
+            }
+        }
     }
 }
