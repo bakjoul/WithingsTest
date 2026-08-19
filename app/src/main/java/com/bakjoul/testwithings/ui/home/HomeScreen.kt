@@ -9,6 +9,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -28,7 +29,8 @@ import org.koin.compose.viewmodel.koinViewModel
 fun HomeScreen(
     viewModel: HomeViewModel = koinViewModel()
 ) {
-    var searchQuery by rememberSaveable { mutableStateOf("") }
+    val state by viewModel.state.collectAsState()
+    var searchQuery by rememberSaveable { mutableStateOf(state.searchQuery) }
 
     Scaffold(
         modifier = Modifier.fillMaxSize(),
@@ -40,6 +42,9 @@ fun HomeScreen(
                         onValueChange = {
                             searchQuery = it
                             viewModel.onSearchQueryChanged(searchQuery)
+                        },
+                        onSearch = {
+                            viewModel.onSearchButtonClicked()
                         },
                         modifier = Modifier
                             .fillMaxWidth()

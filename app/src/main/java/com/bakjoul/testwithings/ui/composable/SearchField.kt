@@ -15,7 +15,6 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -34,7 +33,6 @@ import androidx.compose.ui.text.TextLayoutResult
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.VisualTransformation
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.bakjoul.testwithings.ui.utils.keyboardAsState
 
@@ -42,6 +40,7 @@ import com.bakjoul.testwithings.ui.utils.keyboardAsState
 fun SearchField(
     value: String,
     onValueChange: (String) -> Unit,
+    onSearch: () -> Unit,
     modifier: Modifier = Modifier,
     enabled: Boolean = true,
     readOnly: Boolean = false,
@@ -89,7 +88,12 @@ fun SearchField(
         textStyle = textStyle,
         visualTransformation = visualTransformation,
         keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
-        keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
+        keyboardActions = KeyboardActions(
+            onSearch = {
+                onSearch()
+                focusManager.clearFocus()
+            }
+        ),
         onTextLayout = onTextLayout,
         cursorBrush = cursorBrush,
         decorationBox = { innerTextField ->
@@ -134,15 +138,5 @@ fun SearchField(
                 }
             }
         }
-    )
-}
-
-@Preview
-@Composable
-fun SearchFieldPreview() {
-    SearchField(
-        value = "",
-        onValueChange = {},
-        placeholder = { Text(text = "Search") }
     )
 }
