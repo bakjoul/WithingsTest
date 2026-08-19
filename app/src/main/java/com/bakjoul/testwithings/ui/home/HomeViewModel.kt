@@ -18,23 +18,33 @@ class HomeViewModel(
 
     private val _searchQuery: MutableStateFlow<String> = MutableStateFlow("")
     private val _results: MutableStateFlow<List<ImageResult>> = MutableStateFlow(emptyList())
+    private val _isLoading: MutableStateFlow<Boolean> = MutableStateFlow(false)
+    private val _isLoadingMore: MutableStateFlow<Boolean> = MutableStateFlow(false)
+
+    private var currentPage = 1
 
     private val _state: StateFlow<HomeViewState> = combine(
             _searchQuery,
-            _results
-        ) { query, results ->
+            _results,
+            _isLoading,
+            _isLoadingMore
+        ) { query, results, isLoading, isLoadingMore ->
             println("results: $results")
 
             HomeViewState(
                 searchQuery = query,
-                results = results
+                results = results,
+                isLoading = isLoading,
+                isLoadingMore = isLoadingMore
             )
         }.stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(),
             initialValue = HomeViewState(
                 searchQuery = "",
-                results = emptyList()
+                results = emptyList(),
+                isLoading = false,
+                isLoadingMore = false
         )
     )
     val state: StateFlow<HomeViewState> = _state
@@ -45,13 +55,18 @@ class HomeViewModel(
 
     fun onSearchButtonClicked() {
         viewModelScope.launch {
-            val results = searchForImagesUseCase(query = _searchQuery.value)
-            _results.update { results }
+            _isLoading.value = true
+
+            try {
+                val results = searchForImagesUseCase(_searchQuery.value, currentPage)
+                _results.update { results }
+            } finally {
+                _isLoading.value = false
+            }
         }
     }
 
     fun onClearQueryButtonClicked() {
         _searchQuery.update { "" }
-        _results.update { emptyList() }
     }
 }

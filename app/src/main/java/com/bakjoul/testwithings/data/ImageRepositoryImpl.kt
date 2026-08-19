@@ -4,8 +4,11 @@ import com.bakjoul.testwithings.domain.ImageRepository
 import com.bakjoul.testwithings.domain.model.ImageResult
 
 class ImageRepositoryImpl(private val api: PixabayApi) : ImageRepository {
-    override suspend fun searchForImages(query: String): List<ImageResult> {
-        return api.searchForImages(query)
+    override suspend fun searchForImages(
+        query: String,
+        page: Int
+    ): List<ImageResult> {
+        return api.searchForImages(query, page)
             .hits
             .map { hit ->
                 ImageResult(

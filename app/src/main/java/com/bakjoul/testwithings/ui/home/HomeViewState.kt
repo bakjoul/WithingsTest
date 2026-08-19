@@ -4,5 +4,7 @@ import com.bakjoul.testwithings.domain.model.ImageResult
 
 data class HomeViewState(
     val searchQuery: String,
-    val results: List<ImageResult>
+    val results: List<ImageResult>,
+    val isLoading: Boolean,
+    val isLoadingMore: Boolean
 )
