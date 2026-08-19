@@ -54,7 +54,8 @@ dependencies {
     // Ktor
     implementation(libs.ktor.core)
     implementation(libs.ktor.cio)
-
+    implementation(libs.ktor.content.negotiation)
+    implementation(libs.ktor.serialization.kotlinx.json)
 
     testImplementation(libs.junit)
     androidTestImplementation(platform(libs.androidx.compose.bom))
