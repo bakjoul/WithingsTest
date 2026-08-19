@@ -4,4 +4,7 @@
     <string name="search_icon_desc">Search</string>
     <string name="close_icon_desc">Close</string>
     <string name="search_placeholder">Search for images</string>
+    <string name="image_selected_desc">Image selected</string>
+    <string name="image_unselected_desc">Image unselected</string>
+    <string name="validate_button_desc">Validate</string>
 </resources>

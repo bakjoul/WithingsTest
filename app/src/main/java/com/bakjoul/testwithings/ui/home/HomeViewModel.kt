@@ -18,6 +18,7 @@ class HomeViewModel(
 
     private val _searchQuery: MutableStateFlow<String> = MutableStateFlow("")
     private val _results: MutableStateFlow<List<ImageResult>> = MutableStateFlow(emptyList())
+    private val _selectedImages: MutableStateFlow<Set<Int>> = MutableStateFlow(emptySet())
     private val _isLoading: MutableStateFlow<Boolean> = MutableStateFlow(false)
 
     private var currentPage = 1
@@ -27,13 +28,15 @@ class HomeViewModel(
     private val _state: StateFlow<HomeViewState> = combine(
             _searchQuery,
             _results,
+            _selectedImages,
             _isLoading
-        ) { query, results, isLoading ->
+        ) { query, results, selectedImages, isLoading ->
             println("results: $results")
 
             HomeViewState(
                 searchQuery = query,
                 results = results,
+                selectedImages = selectedImages,
                 isLoading = isLoading
             )
         }.stateIn(
@@ -42,6 +45,7 @@ class HomeViewModel(
             initialValue = HomeViewState(
                 searchQuery = "",
                 results = emptyList(),
+                selectedImages = emptySet(),
                 isLoading = false
         )
     )
@@ -92,5 +96,19 @@ class HomeViewModel(
                 isLoadingNextPage = false
             }
         }
+    }
+
+    fun onImageSelected(id: Int) {
+        _selectedImages.update { selected ->
+            if (id in selected) {
+                selected - id
+            } else {
+                selected + id
+            }
+        }
+    }
+
+    fun onValidateSelectionButtonClicked() {
+
     }
 }
