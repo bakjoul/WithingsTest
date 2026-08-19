@@ -45,7 +45,8 @@ import org.koin.compose.viewmodel.koinViewModel
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen(
-    viewModel: HomeViewModel = koinViewModel()
+    viewModel: HomeViewModel = koinViewModel(),
+    //onSelectionValidated: () -> Unit
 ) {
     val state by viewModel.state.collectAsState()
     val gridState = rememberLazyGridState()
@@ -95,7 +96,10 @@ fun HomeScreen(
         floatingActionButton = {
             if (state.selectedImages.isNotEmpty()) {
                 FloatingActionButton(
-                    onClick = { },
+                    onClick = {
+                        // NOT IMPLEMENTED YET
+                        //onSelectionValidated()
+                    },
                     containerColor = MaterialTheme.colorScheme.primary,
                     contentColor = MaterialTheme.colorScheme.onPrimary
                 ) {
