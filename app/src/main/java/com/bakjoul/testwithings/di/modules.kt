@@ -36,7 +36,7 @@ private val networkModule = module {
     }
 }
 
-private val coreModule = module {
+private val dataModule = module {
     single<PixabayApi> { PixabayApi(get()) }
 }
 
@@ -53,5 +53,5 @@ private val useCaseModule = module {
 }
 
 val appModules = module {
-    includes(networkModule, coreModule, viewModelModule, repositoryModule, useCaseModule)
+    includes(networkModule, dataModule, viewModelModule, repositoryModule, useCaseModule)
 }
