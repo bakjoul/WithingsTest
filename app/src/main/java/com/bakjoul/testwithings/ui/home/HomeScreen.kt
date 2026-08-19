@@ -30,7 +30,6 @@ fun HomeScreen(
     viewModel: HomeViewModel = koinViewModel()
 ) {
     val state by viewModel.state.collectAsState()
-    var searchQuery by rememberSaveable { mutableStateOf(state.searchQuery) }
 
     Scaffold(
         modifier = Modifier.fillMaxSize(),
@@ -38,14 +37,10 @@ fun HomeScreen(
             TopAppBar(
                 title = {
                     SearchField(
-                        value = searchQuery,
-                        onValueChange = {
-                            searchQuery = it
-                            viewModel.onSearchQueryChanged(searchQuery)
-                        },
-                        onSearch = {
-                            viewModel.onSearchButtonClicked()
-                        },
+                        value = state.searchQuery,
+                        onValueChange = { viewModel.onSearchQueryChanged(it) },
+                        onSearch = { viewModel.onSearchButtonClicked() },
+                        onClear = { viewModel.onClearQueryButtonClicked() },
                         modifier = Modifier
                             .fillMaxWidth()
                             .height(48.dp),

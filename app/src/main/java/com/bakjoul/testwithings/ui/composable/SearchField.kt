@@ -41,6 +41,7 @@ fun SearchField(
     value: String,
     onValueChange: (String) -> Unit,
     onSearch: () -> Unit,
+    onClear: () -> Unit,
     modifier: Modifier = Modifier,
     enabled: Boolean = true,
     readOnly: Boolean = false,
@@ -130,6 +131,7 @@ fun SearchField(
                         painter = painterResource(com.bakjoul.testwithings.R.drawable.baseline_close_24),
                         modifier = Modifier.clickable {
                             onValueChange("")
+                            onClear()
                             focusManager.clearFocus()
                         },
                         contentDescription = stringResource(com.bakjoul.testwithings.R.string.close_icon_desc),

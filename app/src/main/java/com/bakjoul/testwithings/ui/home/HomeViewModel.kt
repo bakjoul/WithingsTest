@@ -23,9 +23,8 @@ class HomeViewModel(
             _searchQuery,
             _results
         ) { query, results ->
-            if (results.isNotEmpty()) {
-                println("results: $results")
-            }
+            println("results: $results")
+
             HomeViewState(
                 searchQuery = query,
                 results = results
@@ -49,5 +48,10 @@ class HomeViewModel(
             val results = searchForImagesUseCase(query = _searchQuery.value)
             _results.update { results }
         }
+    }
+
+    fun onClearQueryButtonClicked() {
+        _searchQuery.update { "" }
+        _results.update { emptyList() }
     }
 }
