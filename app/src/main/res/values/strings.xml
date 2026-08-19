@@ -1,3 +1,7 @@
 <resources>
     <string name="app_name">TestWithings</string>
+
+    <string name="search_icon_desc">Search</string>
+    <string name="close_icon_desc">Close</string>
+    <string name="search_placeholder">Search for images</string>
 </resources>
