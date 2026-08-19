@@ -1,5 +1,8 @@
 package com.bakjoul.testwithings.data.model
 
+import kotlinx.serialization.Serializable
+
+@Serializable
 data class PixabayImageDto(
     val id: Int,
     val pageURL: String,
@@ -12,8 +15,8 @@ data class PixabayImageDto(
     val webformatWidth: Int,
     val webformatHeight: Int,
     val largeImageURL: String,
-    val fullHDURL: String,
-    val imageURL: String,
+    val fullHDURL: String? = null,
+    val imageURL: String? = null,
     val imageWidth: Int,
     val imageHeight: Int,
     val imageSize: Int,
