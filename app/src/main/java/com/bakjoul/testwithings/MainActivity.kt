@@ -10,6 +10,7 @@ import androidx.navigation3.ui.NavDisplay
 import com.bakjoul.testwithings.navigation.Detail
 import com.bakjoul.testwithings.navigation.Home
 import com.bakjoul.testwithings.navigation.TopLevelBackStack
+import com.bakjoul.testwithings.ui.detail.DetailScreen
 import com.bakjoul.testwithings.ui.home.HomeScreen
 import com.bakjoul.testwithings.ui.theme.TestWithingsTheme
 
@@ -28,14 +29,17 @@ class MainActivity : ComponentActivity() {
                     entryProvider = entryProvider {
                         entry<Home> {
                             HomeScreen(
-                                /*onSelectionValidated = {
-                                    topLevelBackStack.add(Detail)
-                                }*/
+                                onSelectionValidated = { imageUrls ->
+                                    topLevelBackStack.add(Detail(imageUrls))
+                                }
                             )
                         }
 
-                        entry<Detail> {
-                            //DetailScreen()
+                        entry<Detail> { detail ->
+                            DetailScreen(
+                                images = detail.imageUrls,
+                                onBack = { topLevelBackStack.removeLast() }
+                            )
                         }
                     }
                 )

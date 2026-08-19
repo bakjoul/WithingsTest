@@ -5,6 +5,6 @@ import com.bakjoul.testwithings.domain.model.ImageResult
 data class HomeViewState(
     val searchQuery: String,
     val results: List<ImageResult>,
-    val selectedImages: Set<Int>,
+    val selectedImageUrls: Set<String>,
     val isLoading: Boolean
 )

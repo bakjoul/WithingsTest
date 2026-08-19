@@ -46,7 +46,7 @@ import org.koin.compose.viewmodel.koinViewModel
 @Composable
 fun HomeScreen(
     viewModel: HomeViewModel = koinViewModel(),
-    //onSelectionValidated: () -> Unit
+    onSelectionValidated: ((List<String>) -> Unit)
 ) {
     val state by viewModel.state.collectAsState()
     val gridState = rememberLazyGridState()
@@ -94,11 +94,10 @@ fun HomeScreen(
             )
         },
         floatingActionButton = {
-            if (state.selectedImages.isNotEmpty()) {
+            if (state.selectedImageUrls.isNotEmpty() && state.selectedImageUrls.size >= 2) {
                 FloatingActionButton(
                     onClick = {
-                        // NOT IMPLEMENTED YET
-                        //onSelectionValidated()
+                        onSelectionValidated(state.selectedImageUrls.toList())
                     },
                     containerColor = MaterialTheme.colorScheme.primary,
                     contentColor = MaterialTheme.colorScheme.onPrimary
@@ -134,10 +133,10 @@ fun HomeScreen(
                             .fillMaxWidth()
                             .aspectRatio(1f)
                             .clickable {
-                                viewModel.onImageSelected(it.id)
+                                viewModel.onImageSelected(it.largeImageUrl)
                             }
                     ) {
-                        val isInSelectedImages = it.id in state.selectedImages
+                        val isInSelectedImages = it.largeImageUrl in state.selectedImageUrls
 
                         AsyncImage(
                             model = it.previewUrl,

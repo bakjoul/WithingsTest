@@ -1,9 +1,4 @@
 package com.bakjoul.testwithings.navigation
 
-import kotlinx.serialization.Serializable
-
-@Serializable
 data object Home
-
-@Serializable
-data object Detail
+data class Detail(val imageUrls: List<String>)
