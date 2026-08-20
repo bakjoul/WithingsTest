@@ -3,13 +3,19 @@ package com.bakjoul.testwithings.ui.home
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
@@ -21,7 +27,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -32,14 +37,18 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontStyle
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil3.compose.AsyncImage
 import com.bakjoul.testwithings.R
 import com.bakjoul.testwithings.ui.composable.SearchField
+import com.bakjoul.testwithings.ui.composable.SmallButton
 import org.koin.compose.viewmodel.koinViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -66,32 +75,82 @@ fun HomeScreen(
     Scaffold(
         modifier = Modifier.fillMaxSize(),
         topBar = {
-            TopAppBar(
-                title = {
-                    SearchField(
-                        value = state.searchQuery,
-                        onValueChange = { viewModel.onSearchQueryChanged(it) },
-                        onSearch = { viewModel.onSearchButtonClicked() },
-                        onClear = { viewModel.onClearQueryButtonClicked() },
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(48.dp),
-                        placeholder = {
-                            Text(
-                                text = stringResource(R.string.search_placeholder),
-                                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                fontSize = 16.sp,
-                                overflow = TextOverflow.Ellipsis,
-                                maxLines = 1,
-                            )
-                        },
-                        textStyle = TextStyle(
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 8.dp)
+                    .windowInsetsPadding(WindowInsets.statusBars)
+            ) {
+                SearchField(
+                    value = state.searchQuery,
+                    onValueChange = { viewModel.onSearchQueryChanged(it) },
+                    onSearch = { viewModel.onSearchButtonClicked() },
+                    onClear = { viewModel.onClearQueryButtonClicked() },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(48.dp),
+                    placeholder = {
+                        Text(
+                            text = stringResource(R.string.search_placeholder),
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            fontSize = 16.sp
-                        ),
-                    )
-                },
-            )
+                            fontSize = 16.sp,
+                            overflow = TextOverflow.Ellipsis,
+                            maxLines = 1,
+                        )
+                    },
+                    textStyle = TextStyle(
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        fontSize = 16.sp
+                    ),
+                )
+
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(top = 8.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    if (state.results.isNotEmpty()) {
+                        if (state.selectedImageUrls.isNotEmpty()) {
+                            Text(
+                                text = pluralStringResource(
+                                    R.plurals.selected_images_count,
+                                    state.selectedImageUrls.size,
+                                    state.selectedImageUrls.size
+                                ),
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                fontSize = 14.sp,
+                                fontStyle = FontStyle.Italic,
+                                fontWeight = FontWeight.Bold,
+                                overflow = TextOverflow.Ellipsis,
+                                maxLines = 1
+                            )
+                        } else {
+                            Text(
+                                text = stringResource(R.string.select_images),
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                fontSize = 14.sp,
+                                fontStyle = FontStyle.Italic,
+                                fontWeight = FontWeight.Bold,
+                                overflow = TextOverflow.Ellipsis,
+                                maxLines = 1
+                            )
+                        }
+
+
+                        Spacer(modifier = Modifier.weight(1f))
+
+                        SmallButton(
+                            verticalPadding = 4.dp,
+                            enabled = state.selectedImageUrls.isNotEmpty(),
+                            iconEndPadding = 4.dp,
+                            text = stringResource(R.string.clear_selection),
+                            textSize = 14.sp,
+                            onClick = { viewModel.clearSelection() }
+                        )
+                    }
+                }
+            }
         },
         floatingActionButton = {
             if (state.selectedImageUrls.isNotEmpty() && state.selectedImageUrls.size >= 2) {

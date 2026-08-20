@@ -107,4 +107,8 @@ class HomeViewModel(
             }
         }
     }
+
+    fun clearSelection() {
+        _selectedImageUrls.update { emptySet() }
+    }
 }
