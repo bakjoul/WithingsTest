@@ -33,8 +33,6 @@ class HomeViewModel(
             _selectedImageUrls,
             _isLoading
         ) { query, activeQuery, results, selectedImages, isLoading ->
-            println("results: $results")
-
             HomeViewState(
                 searchQuery = query,
                 activeSearchQuery = activeQuery,

@@ -216,13 +216,7 @@ fun HomeScreen(
                                 .fillMaxWidth()
                                 .aspectRatio(1f),
                             contentScale = ContentScale.Crop,
-                            alpha = if (isInSelectedImages) 0.7f else 1f,
-                            onSuccess = {
-                                println("IMAGE SUCCESS: ${it.result.request.data}")
-                            },
-                            onError = {
-                                println("IMAGE ERROR: ${it.result.throwable}")
-                            }
+                            alpha = if (isInSelectedImages) 0.7f else 1f
                         )
 
                         Icon(
