@@ -8,6 +8,7 @@
     <string name="image_unselected_desc">Image unselected</string>
     <string name="validate_button_desc">Validate</string>
     <string name="back_button_icon_desc">Back</string>
+    <string name="results_for">Results for</string>
     <string name="clear_selection">Clear selection</string>
     <plurals name="selected_images_count">
         <item quantity="one">%d image selected</item>

@@ -17,6 +17,7 @@ class HomeViewModel(
 ) : ViewModel() {
 
     private val _searchQuery: MutableStateFlow<String> = MutableStateFlow("")
+    private val _activeSearchQuery: MutableStateFlow<String> = MutableStateFlow("")
     private val _results: MutableStateFlow<List<ImageResult>> = MutableStateFlow(emptyList())
     private val _selectedImageUrls: MutableStateFlow<Set<String>> = MutableStateFlow(emptySet())
     private val _isLoading: MutableStateFlow<Boolean> = MutableStateFlow(false)
@@ -27,14 +28,16 @@ class HomeViewModel(
 
     private val _state: StateFlow<HomeViewState> = combine(
             _searchQuery,
+        _activeSearchQuery,
             _results,
             _selectedImageUrls,
             _isLoading
-        ) { query, results, selectedImages, isLoading ->
+        ) { query, activeQuery, results, selectedImages, isLoading ->
             println("results: $results")
 
             HomeViewState(
                 searchQuery = query,
+                activeSearchQuery = activeQuery,
                 results = results,
                 selectedImageUrls = selectedImages,
                 isLoading = isLoading
@@ -44,6 +47,7 @@ class HomeViewModel(
             started = SharingStarted.WhileSubscribed(),
             initialValue = HomeViewState(
                 searchQuery = "",
+                activeSearchQuery = "",
                 results = emptyList(),
                 selectedImageUrls = emptySet(),
                 isLoading = false
@@ -56,11 +60,18 @@ class HomeViewModel(
     }
 
     fun onSearchButtonClicked() {
+        val query = _searchQuery.value.trim()
+        if (query.isBlank()) return
+
+        _activeSearchQuery.update { query }
+        currentPage = 1
+        hasMoreResults = true
+
         viewModelScope.launch {
             _isLoading.value = true
 
             try {
-                val results = searchForImagesUseCase(_searchQuery.value, currentPage)
+                val results = searchForImagesUseCase(query, currentPage)
                 _results.update { results }
             } finally {
                 _isLoading.value = false
@@ -69,18 +80,20 @@ class HomeViewModel(
     }
 
     fun onClearQueryButtonClicked() {
-        _searchQuery.update { "" }
+        _searchQuery.value = ""
+        _activeSearchQuery.value = ""
+        _results.value = emptyList()
     }
 
     fun loadNextPage() {
-        if (isLoadingNextPage || !hasMoreResults) return
+        if (isLoadingNextPage || !hasMoreResults || _activeSearchQuery.value.isBlank()) return
+
         isLoadingNextPage = true
 
         viewModelScope.launch {
-
             try {
                 val nextPage = currentPage + 1
-                val results = searchForImagesUseCase(_searchQuery.value, nextPage)
+                val results = searchForImagesUseCase(_activeSearchQuery.value, nextPage)
 
                 if (results.isEmpty()) {
                     hasMoreResults = false

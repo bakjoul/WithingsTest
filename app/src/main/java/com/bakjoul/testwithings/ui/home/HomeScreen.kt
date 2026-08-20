@@ -6,7 +6,6 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
@@ -39,10 +38,13 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil3.compose.AsyncImage
@@ -78,8 +80,9 @@ fun HomeScreen(
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 8.dp)
-                    .windowInsetsPadding(WindowInsets.statusBars)
+                    .padding(8.dp)
+                    .windowInsetsPadding(WindowInsets.statusBars),
+                verticalArrangement = Arrangement.spacedBy(4.dp)
             ) {
                 SearchField(
                     value = state.searchQuery,
@@ -105,45 +108,54 @@ fun HomeScreen(
                 )
 
                 Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(top = 8.dp),
+                    modifier = Modifier.fillMaxWidth(),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     if (state.results.isNotEmpty()) {
-                        if (state.selectedImageUrls.isNotEmpty()) {
+                        Column(
+                            modifier = Modifier.weight(1f)
+                        ) {
                             Text(
-                                text = pluralStringResource(
-                                    R.plurals.selected_images_count,
-                                    state.selectedImageUrls.size,
-                                    state.selectedImageUrls.size
-                                ),
+                                text = buildAnnotatedString {
+                                    append(stringResource(R.string.results_for))
+                                    append(" ")
+                                    withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
+                                        append(state.activeSearchQuery)
+                                    }
+                                },
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .height(20.dp),
                                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                                 fontSize = 14.sp,
-                                fontStyle = FontStyle.Italic,
-                                fontWeight = FontWeight.Bold,
                                 overflow = TextOverflow.Ellipsis,
                                 maxLines = 1
                             )
-                        } else {
+
                             Text(
-                                text = stringResource(R.string.select_images),
+                                text = if (state.selectedImageUrls.isNotEmpty()) {
+                                    pluralStringResource(
+                                        R.plurals.selected_images_count,
+                                        state.selectedImageUrls.size,
+                                        state.selectedImageUrls.size
+                                    )
+                                } else {
+                                    stringResource(R.string.select_images)
+                                },
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .height(20.dp),
                                 color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                fontSize = 14.sp,
+                                fontSize = 12.sp,
                                 fontStyle = FontStyle.Italic,
-                                fontWeight = FontWeight.Bold,
                                 overflow = TextOverflow.Ellipsis,
                                 maxLines = 1
                             )
                         }
 
-
-                        Spacer(modifier = Modifier.weight(1f))
-
                         SmallButton(
-                            verticalPadding = 4.dp,
+                            verticalPadding = 6.dp,
                             enabled = state.selectedImageUrls.isNotEmpty(),
-                            iconEndPadding = 4.dp,
                             text = stringResource(R.string.clear_selection),
                             textSize = 14.sp,
                             onClick = { viewModel.clearSelection() }
