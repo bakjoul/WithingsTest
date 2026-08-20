@@ -81,6 +81,7 @@ class HomeViewModel(
         _searchQuery.value = ""
         _activeSearchQuery.value = ""
         _results.value = emptyList()
+        _selectedImageUrls.value = emptySet()
     }
 
     fun loadNextPage() {
