@@ -64,6 +64,7 @@ class HomeViewModel(
         _activeSearchQuery.update { query }
         currentPage = 1
         hasMoreResults = true
+        _selectedImageUrls.value = emptySet()
 
         viewModelScope.launch {
             _isLoading.value = true
