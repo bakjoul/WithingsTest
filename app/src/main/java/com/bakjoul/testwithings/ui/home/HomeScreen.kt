@@ -70,6 +70,11 @@ fun HomeScreen(
 
     val snackbarController = LocalSnackbarController.current
     val gridState = rememberLazyGridState()
+    val showNoResults =
+        state.activeSearchQuery.isNotBlank() &&
+        state.results.isEmpty() &&
+        !state.isLoading &&
+        !state.isSearchErrorVisible
 
     LaunchedEffect(gridState) {
         snapshotFlow {
@@ -204,7 +209,7 @@ fun HomeScreen(
                     }
                 }
 
-                if (!state.isSearchErrorVisible) {
+                if (!state.isSearchErrorVisible && !showNoResults) {
                     LazyVerticalGrid(
                         columns = GridCells.Fixed(3),
                         modifier = Modifier.fillMaxSize(),
@@ -314,6 +319,28 @@ fun HomeScreen(
 
                     Text(
                         text = stringResource(R.string.search_error),
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        fontSize = 16.sp,
+                        textAlign = TextAlign.Center,
+                        lineHeight = 1.3.em
+                    )
+                }
+            }
+
+            if (showNoResults) {
+                Column(
+                    verticalArrangement = Arrangement.spacedBy(8.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Image(
+                        painter = painterResource(R.drawable.outline_image_search_24),
+                        contentDescription = stringResource(R.string.image_search_icon_desc),
+                        modifier = Modifier.size(196.dp),
+                        colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.onSurfaceVariant)
+                    )
+
+                    Text(
+                        text = stringResource(R.string.no_search_results),
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                         fontSize = 16.sp,
                         textAlign = TextAlign.Center,

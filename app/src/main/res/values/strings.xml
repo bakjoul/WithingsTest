@@ -18,4 +18,6 @@
     <string name="search_error">Unable to load images\nCheck your connection and try again</string>
     <string name="load_more_error">Unable to load more images</string>
     <string name="refresh_icon_desc">Refresh</string>
+    <string name="no_search_results">No results were found for your search</string>
+    <string name="image_search_icon_desc">Image search</string>
 </resources>
