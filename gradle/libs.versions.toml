@@ -15,6 +15,11 @@ serialization = "2.4.10"
 coil = "3.5.0"
 nav3Core = "1.1.6"
 lifecycleViewmodelNav3 = "2.11.0"
+kotlinx-coroutines-test = "1.11.0"
+assertk = "0.28.1"
+turbine = "1.2.1"
+mokkery = "3.4.2"
+all-open = "2.4.10"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -49,7 +54,13 @@ androidx-navigation3-runtime = { module = "androidx.navigation3:navigation3-runt
 androidx-navigation3-ui = { module = "androidx.navigation3:navigation3-ui", version.ref = "nav3Core" }
 androidx-lifecycle-viewmodel-navigation3 = { module = "androidx.lifecycle:lifecycle-viewmodel-navigation3", version.ref = "lifecycleViewmodelNav3" }
 
+kotlinx-coroutines-test = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-test", version.ref = "kotlinx-coroutines-test" }
+assertk = { module = "com.willowtreeapps.assertk:assertk", version.ref = "assertk" }
+turbine = { module = "app.cash.turbine:turbine", version.ref = "turbine" }
+
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
 kotlin-compose = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
 serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "serialization" }
+mokkery = { id = "dev.mokkery", version.ref = "mokkery"}
+allOpen = { id = "org.jetbrains.kotlin.plugin.allopen", version.ref = "all-open" }

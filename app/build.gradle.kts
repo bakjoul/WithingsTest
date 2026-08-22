@@ -4,6 +4,8 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.serialization)
+    alias(libs.plugins.mokkery)
+    alias(libs.plugins.allOpen)
 }
 
 android {
@@ -78,6 +80,11 @@ dependencies {
     implementation(libs.androidx.navigation3.ui)
     implementation(libs.androidx.lifecycle.viewmodel.navigation3)
 
+    // Tests
+    testImplementation(libs.kotlinx.coroutines.test)
+    implementation(libs.assertk)
+    implementation(libs.turbine)
+
     testImplementation(libs.junit)
     androidTestImplementation(platform(libs.androidx.compose.bom))
     androidTestImplementation(libs.androidx.compose.ui.test.junit4)
@@ -85,4 +92,11 @@ dependencies {
     androidTestImplementation(libs.androidx.junit)
     debugImplementation(libs.androidx.compose.ui.test.manifest)
     debugImplementation(libs.androidx.compose.ui.tooling)
+}
+
+fun isTestingTask(name: String) = name.endsWith("Test")
+if (gradle.startParameter.taskNames.any(::isTestingTask)) {
+    allOpen {
+        annotation("com.bakjoul.OpenForMokkery")
+    }
 }
