@@ -52,6 +52,8 @@ import com.bakjoul.testwithings.R
 import com.bakjoul.testwithings.ui.theme.Purple80
 import com.bakjoul.testwithings.ui.utils.filmstripBorder
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.isActive
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.withTimeoutOrNull
 import org.koin.compose.viewmodel.koinViewModel
 import kotlin.time.Duration.Companion.seconds
@@ -80,23 +82,24 @@ fun DetailScreen(
         viewModel.setImageCount(images.size)
     }
 
-    // Auto-scroll
+    // Auto-scroll, progress bar and user interaction handling
     LaunchedEffect(state.isLoading, isFocused, pagerState) {
         if (state.isLoading || isFocused) return@LaunchedEffect
 
-        while (!isFocused) {
+        while (isActive && !isFocused) {
             progress.snapTo(0f)
 
-            // Wait for a user interaction
             val userInteracted = withTimeoutOrNull(3.5.seconds) {
-                progress.animateTo(
-                    targetValue = 1f,
-                    animationSpec = tween(durationMillis = 3500, easing = LinearEasing)
-                )
-
-                pagerState.interactionSource.interactions.first {
-                    it is DragInteraction.Start
+                val progressJob = launch {
+                    progress.animateTo(
+                        targetValue = 1f,
+                        animationSpec = tween(durationMillis = 3500, easing = LinearEasing)
+                    )
                 }
+                // Wait for a user interaction while the progress animation is running
+                pagerState.interactionSource.interactions.first { it is DragInteraction.Start }
+                // Cancel the progress animation if the user interacted
+                progressJob.cancel()
                 true
             } ?: false
 
