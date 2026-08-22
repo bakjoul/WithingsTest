@@ -11,8 +11,6 @@ import assertk.assertions.isTrue
 import com.bakjoul.testwithings.domain.SearchForImagesUseCase
 import com.bakjoul.testwithings.domain.model.ImageResult
 import com.bakjoul.testwithings.domain.model.ImageSearchResult
-import com.bakjoul.testwithings.ui.home.HomeViewEvent
-import com.bakjoul.testwithings.ui.home.HomeViewModel
 import dev.mokkery.answering.returns
 import dev.mokkery.everySuspend
 import dev.mokkery.matcher.any
@@ -43,7 +41,6 @@ class HomeViewModelTest {
     @Before
     fun setUp() {
         Dispatchers.setMain(dispatcher)
-        initViewModel()
     }
 
     @After
