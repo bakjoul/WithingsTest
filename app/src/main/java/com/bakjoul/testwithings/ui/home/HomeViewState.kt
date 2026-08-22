@@ -7,5 +7,7 @@ data class HomeViewState(
     val activeSearchQuery: String,
     val results: List<ImageResult>,
     val selectedImageUrls: Set<String>,
-    val isLoading: Boolean
+    val isLoading: Boolean,
+    val isLoadingNextPage: Boolean,
+    val isSearchErrorVisible: Boolean
 )

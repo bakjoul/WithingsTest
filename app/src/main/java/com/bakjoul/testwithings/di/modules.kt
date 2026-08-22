@@ -1,9 +1,10 @@
 package com.bakjoul.testwithings.di
 
-import com.bakjoul.testwithings.data.ImageRepositoryImpl
+import com.bakjoul.testwithings.data.ImageRepositoryPixabay
 import com.bakjoul.testwithings.data.PixabayApi
 import com.bakjoul.testwithings.domain.ImageRepository
 import com.bakjoul.testwithings.domain.SearchForImagesUseCase
+import com.bakjoul.testwithings.ui.detail.DetailViewModel
 import com.bakjoul.testwithings.ui.home.HomeViewModel
 import io.ktor.client.HttpClient
 import io.ktor.client.plugins.HttpTimeout
@@ -42,10 +43,11 @@ private val dataModule = module {
 
 private val viewModelModule = module {
     factoryOf(::HomeViewModel)
+    factoryOf(::DetailViewModel)
 }
 
 private val repositoryModule = module {
-    single<ImageRepository> { ImageRepositoryImpl(get()) }
+    single<ImageRepository> { ImageRepositoryPixabay(get()) }
 }
 
 private val useCaseModule = module {

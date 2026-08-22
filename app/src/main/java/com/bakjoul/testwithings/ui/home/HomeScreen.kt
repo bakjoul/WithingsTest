@@ -43,6 +43,7 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
@@ -51,6 +52,9 @@ import coil3.compose.AsyncImage
 import com.bakjoul.testwithings.R
 import com.bakjoul.testwithings.ui.composable.SearchField
 import com.bakjoul.testwithings.ui.composable.SmallButton
+import com.bakjoul.testwithings.ui.snackbar.LocalSnackbarController
+import com.bakjoul.testwithings.ui.snackbar.SnackbarEvent
+import kotlinx.coroutines.flow.distinctUntilChanged
 import org.koin.compose.viewmodel.koinViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -60,15 +64,37 @@ fun HomeScreen(
     onSelectionValidated: ((List<String>) -> Unit)
 ) {
     val state by viewModel.state.collectAsState()
+
+    val snackbarController = LocalSnackbarController.current
     val gridState = rememberLazyGridState()
 
     LaunchedEffect(gridState) {
         snapshotFlow {
-            gridState.layoutInfo.visibleItemsInfo.lastOrNull()?.index
-        }.collect { lastVisibleItemIndex ->
-            if (lastVisibleItemIndex != null) {
-                if (lastVisibleItemIndex >= state.results.lastIndex - 5) {
-                    viewModel.loadNextPage()
+            val layoutInfo = gridState.layoutInfo
+            val lastItem = layoutInfo.visibleItemsInfo.lastOrNull()
+
+            lastItem != null &&
+            lastItem.index == layoutInfo.totalItemsCount - 1 &&
+            lastItem.offset.y + lastItem.size.height <= layoutInfo.viewportEndOffset
+        }
+            .distinctUntilChanged()
+            .collect { isAtBottom ->
+            if (isAtBottom) {
+                viewModel.loadNextPage()
+            }
+        }
+    }
+
+    val loadMoreErrorMessage = stringResource(R.string.load_more_error)
+    LaunchedEffect(Unit) {
+        viewModel.events.collect { event ->
+            when (event) {
+                HomeViewEvent.LoadMoreError -> {
+                    snackbarController.sendEvent(
+                        SnackbarEvent(
+                            message = loadMoreErrorMessage
+                        )
+                    )
                 }
             }
         }
@@ -165,7 +191,7 @@ fun HomeScreen(
             }
         },
         floatingActionButton = {
-            if (state.selectedImageUrls.isNotEmpty() && state.selectedImageUrls.size >= 2) {
+            if (state.selectedImageUrls.size >= 2) {
                 FloatingActionButton(
                     onClick = {
                         onSelectionValidated(state.selectedImageUrls.toList())
@@ -187,63 +213,75 @@ fun HomeScreen(
                 .padding(innerPadding),
             contentAlignment = Alignment.Center
         ) {
-            LazyVerticalGrid(
-                columns = GridCells.Fixed(3),
-                modifier = Modifier.fillMaxSize(),
-                state = gridState,
-                contentPadding = PaddingValues(8.dp),
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
-                verticalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                items(
-                    items = state.results,
-                    key = { it.id }
+            if (!state.isSearchErrorVisible) {
+                LazyVerticalGrid(
+                    columns = GridCells.Fixed(3),
+                    modifier = Modifier.fillMaxSize(),
+                    state = gridState,
+                    contentPadding = PaddingValues(8.dp),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    Box(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .aspectRatio(1f)
-                            .clickable {
-                                viewModel.onImageSelected(it.largeImageUrl)
-                            }
+                    items(
+                        items = state.results,
+                        key = { it.id }
                     ) {
-                        val isInSelectedImages = it.largeImageUrl in state.selectedImageUrls
-
-                        AsyncImage(
-                            model = it.previewUrl,
-                            contentDescription = null,
+                        Box(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .aspectRatio(1f),
-                            contentScale = ContentScale.Crop,
-                            alpha = if (isInSelectedImages) 0.7f else 1f
-                        )
+                                .aspectRatio(1f)
+                                .clickable {
+                                    viewModel.onImageSelected(it.largeImageUrl)
+                                }
+                        ) {
+                            val isInSelectedImages = it.largeImageUrl in state.selectedImageUrls
 
-                        Icon(
-                            painter = if (isInSelectedImages) {
-                                painterResource(R.drawable.outline_check_circle_24)
-                            } else {
-                                painterResource(R.drawable.outline_circle_24)
-                            },
-                            contentDescription = if (isInSelectedImages) {
-                                stringResource(R.string.image_selected_desc)
-                            } else {
-                                stringResource(R.string.image_unselected_desc)
-                            },
-                            modifier = Modifier
-                                .align(Alignment.TopEnd)
-                                .padding(4.dp),
-                            tint = Color.White
-                        )
+                            AsyncImage(
+                                model = it.previewUrl,
+                                contentDescription = null,
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .aspectRatio(1f),
+                                contentScale = ContentScale.Crop,
+                                error = painterResource(R.drawable.baseline_broken_image_24),
+                                alpha = if (isInSelectedImages) 0.7f else 1f
+                            )
+
+                            Icon(
+                                painter = if (isInSelectedImages) {
+                                    painterResource(R.drawable.outline_check_circle_24)
+                                } else {
+                                    painterResource(R.drawable.outline_circle_24)
+                                },
+                                contentDescription = if (isInSelectedImages) {
+                                    stringResource(R.string.image_selected_desc)
+                                } else {
+                                    stringResource(R.string.image_unselected_desc)
+                                },
+                                modifier = Modifier
+                                    .align(Alignment.TopEnd)
+                                    .padding(4.dp),
+                                tint = Color.White
+                            )
+                        }
                     }
                 }
             }
 
-            if (state.isLoading) {
+            if (state.isLoading || state.isLoadingNextPage) {
                 CircularProgressIndicator(
                     modifier = Modifier.width(64.dp),
                     color = MaterialTheme.colorScheme.secondary,
                     trackColor = MaterialTheme.colorScheme.surfaceVariant,
+                )
+            }
+
+            if (state.isSearchErrorVisible && !state.isLoading) {
+                Text(
+                    text = stringResource(R.string.search_error),
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    fontSize = 16.sp,
+                    textAlign = TextAlign.Center
                 )
             }
         }
