@@ -49,7 +49,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil3.compose.AsyncImage
 import com.bakjoul.testwithings.R
-import com.bakjoul.testwithings.ui.theme.Purple80
 import com.bakjoul.testwithings.ui.utils.filmstripBorder
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.isActive
@@ -176,22 +175,24 @@ fun DetailScreen(
                     progress = { progress.value },
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(8.dp),
-                    color = Purple80,
+                        .height(4.dp),
+                    color = Color.Black.copy(alpha = 0.8f),
                     trackColor = Color.Transparent,
                     strokeCap = StrokeCap.Butt,
                     drawStopIndicator = {}
                 )
 
-                Text(
-                    text = "${pagerState.currentPage + 1} / ${images.size}",
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(top = 4.dp, end = 8.dp),
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    fontSize = 11.sp,
-                    textAlign = TextAlign.End,
-                )
+                if (!state.isLoading) {
+                    Text(
+                        text = "${pagerState.currentPage + 1} / ${images.size}",
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(top = 4.dp, end = 8.dp),
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        fontSize = 11.sp,
+                        textAlign = TextAlign.End,
+                    )
+                }
             }
 
             AnimatedVisibility(
