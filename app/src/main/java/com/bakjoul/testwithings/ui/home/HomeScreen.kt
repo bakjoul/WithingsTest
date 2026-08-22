@@ -1,20 +1,20 @@
 package com.bakjoul.testwithings.ui.home
 
+import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.statusBars
-import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.windowInsetsPadding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
@@ -34,6 +34,7 @@ import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.pluralStringResource
@@ -46,7 +47,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.text.withStyle
+import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.em
 import androidx.compose.ui.unit.sp
 import coil3.compose.AsyncImage
 import com.bakjoul.testwithings.R
@@ -102,37 +105,49 @@ fun HomeScreen(
 
     Scaffold(
         modifier = Modifier.fillMaxSize(),
-        topBar = {
+        floatingActionButton = {
+            if (state.selectedImageUrls.size >= 2) {
+                FloatingActionButton(
+                    onClick = {
+                        onSelectionValidated(state.selectedImageUrls.toList())
+                    },
+                    containerColor = MaterialTheme.colorScheme.primary,
+                    contentColor = MaterialTheme.colorScheme.onPrimary
+                ) {
+                    Icon(
+                        painter = painterResource(R.drawable.baseline_check_24),
+                        contentDescription = stringResource(R.string.validate_button_desc)
+                    )
+                }
+            }
+        }
+    ) { innerPadding ->
+        BoxWithConstraints(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(innerPadding),
+            contentAlignment = Alignment.Center
+        ) {
+            val hasSearched = state.activeSearchQuery.isNotBlank()
+
+            val searchBarHeight = 48.dp
+            val topPadding = 8.dp
+            val centerOffset = (maxHeight - searchBarHeight) / 2
+
+            val searchBarOffset by animateDpAsState(
+                targetValue = if (hasSearched) {
+                    topPadding
+                } else {
+                    centerOffset
+                }
+            )
+
             Column(
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(8.dp)
-                    .windowInsetsPadding(WindowInsets.statusBars),
-                verticalArrangement = Arrangement.spacedBy(4.dp)
+                    .fillMaxSize()
+                    .padding(top = searchBarHeight + 16.dp, bottom = 8.dp, start = 8.dp, end = 8.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                SearchField(
-                    value = state.searchQuery,
-                    onValueChange = { viewModel.onSearchQueryChanged(it) },
-                    onSearch = { viewModel.onSearchButtonClicked() },
-                    onClear = { viewModel.onClearQueryButtonClicked() },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(48.dp),
-                    placeholder = {
-                        Text(
-                            text = stringResource(R.string.search_placeholder),
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            fontSize = 16.sp,
-                            overflow = TextOverflow.Ellipsis,
-                            maxLines = 1,
-                        )
-                    },
-                    textStyle = TextStyle(
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        fontSize = 16.sp
-                    ),
-                )
-
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     verticalAlignment = Alignment.CenterVertically
@@ -188,101 +203,123 @@ fun HomeScreen(
                         )
                     }
                 }
-            }
-        },
-        floatingActionButton = {
-            if (state.selectedImageUrls.size >= 2) {
-                FloatingActionButton(
-                    onClick = {
-                        onSelectionValidated(state.selectedImageUrls.toList())
-                    },
-                    containerColor = MaterialTheme.colorScheme.primary,
-                    contentColor = MaterialTheme.colorScheme.onPrimary
-                ) {
-                    Icon(
-                        painter = painterResource(R.drawable.baseline_check_24),
-                        contentDescription = stringResource(R.string.validate_button_desc)
-                    )
-                }
-            }
-        }
-    ) { innerPadding ->
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(innerPadding),
-            contentAlignment = Alignment.Center
-        ) {
-            if (!state.isSearchErrorVisible) {
-                LazyVerticalGrid(
-                    columns = GridCells.Fixed(3),
-                    modifier = Modifier.fillMaxSize(),
-                    state = gridState,
-                    contentPadding = PaddingValues(8.dp),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    verticalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    items(
-                        items = state.results,
-                        key = { it.id }
-                    ) {
-                        Box(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .aspectRatio(1f)
-                                .clickable {
-                                    viewModel.onImageSelected(it.largeImageUrl)
-                                }
-                        ) {
-                            val isInSelectedImages = it.largeImageUrl in state.selectedImageUrls
 
-                            AsyncImage(
-                                model = it.previewUrl,
-                                contentDescription = null,
+                if (!state.isSearchErrorVisible) {
+                    LazyVerticalGrid(
+                        columns = GridCells.Fixed(3),
+                        modifier = Modifier.fillMaxSize(),
+                        state = gridState,
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        verticalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        items(
+                            items = state.results,
+                            key = { it.id }
+                        ) {
+                            Box(
                                 modifier = Modifier
                                     .fillMaxWidth()
-                                    .aspectRatio(1f),
-                                contentScale = ContentScale.Crop,
-                                error = painterResource(R.drawable.baseline_broken_image_24),
-                                alpha = if (isInSelectedImages) 0.7f else 1f
-                            )
+                                    .aspectRatio(1f)
+                                    .clickable {
+                                        viewModel.onImageSelected(it.largeImageUrl)
+                                    }
+                            ) {
+                                val isInSelectedImages = it.largeImageUrl in state.selectedImageUrls
 
-                            Icon(
-                                painter = if (isInSelectedImages) {
-                                    painterResource(R.drawable.outline_check_circle_24)
-                                } else {
-                                    painterResource(R.drawable.outline_circle_24)
-                                },
-                                contentDescription = if (isInSelectedImages) {
-                                    stringResource(R.string.image_selected_desc)
-                                } else {
-                                    stringResource(R.string.image_unselected_desc)
-                                },
-                                modifier = Modifier
-                                    .align(Alignment.TopEnd)
-                                    .padding(4.dp),
-                                tint = Color.White
-                            )
+                                AsyncImage(
+                                    model = it.previewUrl,
+                                    contentDescription = null,
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .aspectRatio(1f),
+                                    contentScale = ContentScale.Crop,
+                                    error = painterResource(R.drawable.baseline_broken_image_24),
+                                    alpha = if (isInSelectedImages) 0.7f else 1f
+                                )
+
+                                Icon(
+                                    painter = if (isInSelectedImages) {
+                                        painterResource(R.drawable.outline_check_circle_24)
+                                    } else {
+                                        painterResource(R.drawable.outline_circle_24)
+                                    },
+                                    contentDescription = if (isInSelectedImages) {
+                                        stringResource(R.string.image_selected_desc)
+                                    } else {
+                                        stringResource(R.string.image_unselected_desc)
+                                    },
+                                    modifier = Modifier
+                                        .align(Alignment.TopEnd)
+                                        .padding(4.dp),
+                                    tint = Color.White
+                                )
+                            }
                         }
                     }
                 }
             }
 
+            SearchField(
+                value = state.searchQuery,
+                onValueChange = { viewModel.onSearchQueryChanged(it) },
+                onSearch = { viewModel.onSearchButtonClicked() },
+                onClear = { viewModel.onClearQueryButtonClicked() },
+                modifier = Modifier
+                    .height(searchBarHeight)
+                    .padding(horizontal = 8.dp)
+                    .align(Alignment.TopCenter)
+                    .offset {
+                        IntOffset(
+                            x = 0,
+                            y = searchBarOffset.roundToPx()
+                        )
+                    },
+                placeholder = {
+                    Text(
+                        text = stringResource(R.string.search_placeholder),
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        fontSize = 16.sp,
+                        overflow = TextOverflow.Ellipsis,
+                        maxLines = 1,
+                    )
+                },
+                textStyle = TextStyle(
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    fontSize = 16.sp
+                ),
+            )
+
             if (state.isLoading || state.isLoadingNextPage) {
                 CircularProgressIndicator(
-                    modifier = Modifier.width(64.dp),
                     color = MaterialTheme.colorScheme.secondary,
-                    trackColor = MaterialTheme.colorScheme.surfaceVariant,
+                    trackColor = MaterialTheme.colorScheme.surfaceVariant
                 )
             }
 
             if (state.isSearchErrorVisible && !state.isLoading) {
-                Text(
-                    text = stringResource(R.string.search_error),
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    fontSize = 16.sp,
-                    textAlign = TextAlign.Center
-                )
+                Column(
+                    verticalArrangement = Arrangement.spacedBy(8.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Image(
+                        painter = painterResource(R.drawable.outline_refresh_24),
+                        contentDescription = stringResource(R.string.refresh_icon_desc),
+                        modifier = Modifier
+                            .size(196.dp)
+                            .clickable {
+                                viewModel.onSearchButtonClicked()
+                            },
+                        colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.onSurfaceVariant)
+                    )
+
+                    Text(
+                        text = stringResource(R.string.search_error),
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        fontSize = 16.sp,
+                        textAlign = TextAlign.Center,
+                        lineHeight = 1.3.em
+                    )
+                }
             }
         }
     }

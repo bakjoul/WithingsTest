@@ -15,6 +15,7 @@
         <item quantity="other">%d images selected</item>
     </plurals>
     <string name="select_images">Select at least 2 images</string>
-    <string name="search_error">Unable to load images.\nCheck your connection and try again.</string>
+    <string name="search_error">Unable to load images\nCheck your connection and try again</string>
     <string name="load_more_error">Unable to load more images</string>
+    <string name="refresh_icon_desc">Refresh</string>
 </resources>
