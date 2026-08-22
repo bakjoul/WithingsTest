@@ -1,12 +1,16 @@
 package com.bakjoul.testwithings.ui.home
 
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
@@ -20,11 +24,11 @@ import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SuggestionChip
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -60,7 +64,8 @@ import com.bakjoul.testwithings.ui.snackbar.SnackbarEvent
 import kotlinx.coroutines.flow.distinctUntilChanged
 import org.koin.compose.viewmodel.koinViewModel
 
-@OptIn(ExperimentalMaterial3Api::class)
+val DEFAULT_SEARCH_SUGGESTIONS = listOf("Dogs", "Cats", "Nature", "Travel", "Architecture", "Food", "Sports", "Ocean")
+
 @Composable
 fun HomeScreen(
     viewModel: HomeViewModel = koinViewModel(),
@@ -264,13 +269,8 @@ fun HomeScreen(
                 }
             }
 
-            SearchField(
-                value = state.searchQuery,
-                onValueChange = { viewModel.onSearchQueryChanged(it) },
-                onSearch = { viewModel.onSearchButtonClicked() },
-                onClear = { viewModel.onClearQueryButtonClicked() },
+            Column(
                 modifier = Modifier
-                    .height(searchBarHeight)
                     .padding(horizontal = 8.dp)
                     .align(Alignment.TopCenter)
                     .offset {
@@ -279,20 +279,49 @@ fun HomeScreen(
                             y = searchBarOffset.roundToPx()
                         )
                     },
-                placeholder = {
-                    Text(
-                        text = stringResource(R.string.search_placeholder),
+                verticalArrangement = Arrangement.spacedBy(8.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                SearchField(
+                    value = state.searchQuery,
+                    onValueChange = { viewModel.onSearchQueryChanged(it) },
+                    onSearch = { viewModel.onSearchButtonClicked() },
+                    onClear = { viewModel.onClearQueryButtonClicked() },
+                    modifier = Modifier.height(searchBarHeight),
+                    placeholder = {
+                        Text(
+                            text = stringResource(R.string.search_placeholder),
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            fontSize = 16.sp,
+                            overflow = TextOverflow.Ellipsis,
+                            maxLines = 1,
+                        )
+                    },
+                    textStyle = TextStyle(
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        fontSize = 16.sp,
-                        overflow = TextOverflow.Ellipsis,
-                        maxLines = 1,
-                    )
-                },
-                textStyle = TextStyle(
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    fontSize = 16.sp
-                ),
-            )
+                        fontSize = 16.sp
+                    ),
+                )
+
+                AnimatedVisibility(
+                    visible = !hasSearched,
+                    enter = fadeIn(),
+                    exit = fadeOut()
+                ) {
+                    FlowRow(
+                        modifier = Modifier.align(Alignment.CenterHorizontally),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterHorizontally),
+                        verticalArrangement = Arrangement.spacedBy((-4).dp)
+                    ) {
+                        DEFAULT_SEARCH_SUGGESTIONS.forEach { keyword ->
+                            SuggestionChip(
+                                onClick = { viewModel.onSuggestionClick(keyword) },
+                                label = { Text(keyword) }
+                            )
+                        }
+                    }
+                }
+            }
 
             if (state.isLoading || state.isLoadingNextPage) {
                 CircularProgressIndicator(

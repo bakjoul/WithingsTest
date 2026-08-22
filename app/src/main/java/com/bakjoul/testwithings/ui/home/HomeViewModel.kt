@@ -6,6 +6,7 @@ import com.bakjoul.testwithings.domain.SearchForImagesUseCase
 import com.bakjoul.testwithings.domain.model.ImageResult
 import com.bakjoul.testwithings.domain.model.ImageSearchResult
 import com.bakjoul.testwithings.ui.utils.combine
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
@@ -30,6 +31,7 @@ class HomeViewModel(
 
     private var currentPage = 1
     private var hasMoreResults = true
+    private var searchJob: Job? = null
 
     private val _state: StateFlow<HomeViewState> = combine(
         _searchQuery,
@@ -83,7 +85,9 @@ class HomeViewModel(
 
         _isLoading.value = true
 
-        viewModelScope.launch {
+        searchJob?.cancel()
+
+        searchJob = viewModelScope.launch {
             try {
                 when (val result = searchForImagesUseCase(query, currentPage)) {
                     is ImageSearchResult.Success -> {
@@ -102,6 +106,9 @@ class HomeViewModel(
     }
 
     fun onClearQueryButtonClicked() {
+        searchJob?.cancel()
+        searchJob = null
+
         _searchQuery.value = ""
         _activeSearchQuery.value = ""
         _results.value = emptyList()
@@ -154,5 +161,10 @@ class HomeViewModel(
 
     fun clearSelection() {
         _selectedImageUrls.update { emptySet() }
+    }
+
+    fun onSuggestionClick(keyword: String) {
+        _searchQuery.value = keyword
+        onSearchButtonClicked()
     }
 }
