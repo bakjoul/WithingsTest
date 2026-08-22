@@ -48,10 +48,14 @@ class TopLevelBackStack<T : Any>(startKey: T) {
     }
 
     fun removeLast() {
-        val removedKey = topLevelStacks[topLevelKey]?.removeLastOrNull()
+        val currentStack = topLevelStacks[topLevelKey] ?: return
+        if (currentStack.size <= 1 && topLevelStacks.size <= 1) return
+
+        val removedKey = currentStack.removeLastOrNull() ?: return
         // If the removed key was a top level key, remove the associated top level stack
         topLevelStacks.remove(removedKey)
-        topLevelKey = topLevelStacks.keys.last()
+
+        topLevelKey = topLevelStacks.keys.lastOrNull() ?: return
         updateBackStack()
     }
 }
