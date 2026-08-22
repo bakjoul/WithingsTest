@@ -1,4 +1,4 @@
-package com.bakjoul.testwithings.home.ui
+package com.bakjoul.testwithings.ui.home
 
 import app.cash.turbine.test
 import assertk.assertThat
@@ -55,7 +55,12 @@ class HomeViewModelTest {
     fun `should update results when search succeeds`() = runTest {
         // Given
         val query = "cats"
-        everySuspend { searchForImagesUseCase.invoke(query, 1) } returns getSuccessfulImageSearchResult()
+        everySuspend {
+            searchForImagesUseCase.invoke(
+                query,
+                1
+            )
+        } returns getSuccessfulImageSearchResult()
         initViewModel()
 
         viewModel.state.test {
@@ -82,7 +87,9 @@ class HomeViewModelTest {
         // Given
         val query = "cats"
         val exception = IOException("Network error")
-        everySuspend { searchForImagesUseCase.invoke(query, 1) } returns ImageSearchResult.Error(exception)
+        everySuspend { searchForImagesUseCase.invoke(query, 1) } returns ImageSearchResult.Error(
+            exception
+        )
         initViewModel()
 
         viewModel.state.test {
@@ -110,8 +117,18 @@ class HomeViewModelTest {
     fun `should append results when loading next page succeeds`() = runTest {
         // Given
         val query = "cats"
-        everySuspend { searchForImagesUseCase.invoke(query, 1) } returns getSuccessfulImageSearchResult()
-        everySuspend { searchForImagesUseCase.invoke(query, 2) } returns getOtherSuccessfulImageSearchResult()
+        everySuspend {
+            searchForImagesUseCase.invoke(
+                query,
+                1
+            )
+        } returns getSuccessfulImageSearchResult()
+        everySuspend {
+            searchForImagesUseCase.invoke(
+                query,
+                2
+            )
+        } returns getOtherSuccessfulImageSearchResult()
         initViewModel()
 
         viewModel.state.test {
@@ -142,8 +159,15 @@ class HomeViewModelTest {
     fun `should emit load more error when loading next page fails`() = runTest {
         // Given
         val query = "cats"
-        everySuspend { searchForImagesUseCase.invoke(query, 1) } returns getSuccessfulImageSearchResult()
-        everySuspend { searchForImagesUseCase.invoke(query, 2) } returns ImageSearchResult.Error(IOException("Network error"))
+        everySuspend {
+            searchForImagesUseCase.invoke(
+                query,
+                1
+            )
+        } returns getSuccessfulImageSearchResult()
+        everySuspend { searchForImagesUseCase.invoke(query, 2) } returns ImageSearchResult.Error(
+            IOException("Network error")
+        )
         initViewModel()
 
         viewModel.events.test {
