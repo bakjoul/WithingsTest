@@ -10,6 +10,7 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.DragInteraction
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -120,7 +121,7 @@ fun DetailScreen(
         modifier = Modifier.fillMaxSize(),
         topBar = {
             TopAppBar(
-                title = { },
+                title = { Text(text = stringResource(R.string.detail_screen_title)) },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
                         Icon(
@@ -158,7 +159,9 @@ fun DetailScreen(
                         modifier = Modifier
                             .fillMaxWidth()
                             .aspectRatio(1f)
-                            .filmstripBorder()
+                            .filmstripBorder(
+                                color = if (isSystemInDarkTheme()) Color.White else Color.Black
+                            )
                             .clickable {
                                 focusedPagerState.requestScrollToPage(pagerState.currentPage)
                                 isFocused = true
@@ -176,7 +179,7 @@ fun DetailScreen(
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(4.dp),
-                    color = Color.Black.copy(alpha = 0.8f),
+                    color = MaterialTheme.colorScheme.primary,
                     trackColor = Color.Transparent,
                     strokeCap = StrokeCap.Butt,
                     drawStopIndicator = {}
